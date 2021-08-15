@@ -1,0 +1,24 @@
+name: "测试"
+mode: "debug"
+version: "v0.0.1"
+port: 9100
+admin:
+  name: "FFtp"
+  passwd: "1234asdf"
+  avatar: "https://gitee.com/SunspotsInys/demo/raw/master/imGo/1685B4D357ACCF94.jpg"
+log:
+  level: "debug"
+  filename: "logs.log"
+  max_size: 1
+  max_age: 30
+  max_backups: 7
+  prefix: "D:/Go/thedoor/"
+  console: false
+mariadb:
+  host: "127.0.0.1"
+  port: 3306
+  user: "thedoor"
+  password: "1234asdf"
+  db_name: "thedoor"
+  max_open_conns: 20
+  max_idle_conns: 50
