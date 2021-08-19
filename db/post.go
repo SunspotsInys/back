@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/SunspotsInys/thedoor/models"
 	"github.com/SunspotsInys/thedoor/utils"
@@ -34,17 +35,18 @@ func GetPostDetail(p *models.PostWithTag, id uint64, isAdmin bool) error {
 }
 
 func GetPostList(ps *[]models.PostWithTag, page, len int, onlyPublic bool) error {
-	sqlStr := "SELECT `id`, `title`, LEFT(`content`, 50) `content`, `createTime`, `public`, `top` " +
-		"FROM `posts` " +
-		"%s" +
-		"ORDER BY `top` DESC " +
-		"LIMIT ? " +
-		"OFFSET ? "
+	sqlStr := " SELECT `id`, `title`, LEFT(`content`, 150) `content`, `createTime`, `public`, `top` " +
+		" FROM `posts` " +
+		" %s " +
+		" ORDER BY `top` DESC, `id` DESC " +
+		" LIMIT ? " +
+		" OFFSET ? "
 	if onlyPublic {
 		sqlStr = fmt.Sprintf(sqlStr, " WHERE `public` = true ")
 	} else {
 		sqlStr = fmt.Sprintf(sqlStr, "")
 	}
+	log.Println(sqlStr)
 	err := db.Select(ps, sqlStr, len, (page-1)*len)
 	if err != nil {
 		return err

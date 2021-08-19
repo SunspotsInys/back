@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"time"
 
 	"github.com/SunspotsInys/thedoor/db"
@@ -24,7 +25,8 @@ func GetPostList(c *gin.Context) {
 	logger.Info().Msgf("%+v", data)
 
 	// 判断是否是管理员
-	isAdmin := c.GetBool("admin")
+	isAdmin := c.GetBool("isAdmin")
+	log.Println("isAdmin = ", isAdmin)
 
 	// 获取博客信息
 	var ps []models.PostWithTag
