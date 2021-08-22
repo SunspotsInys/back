@@ -41,7 +41,7 @@ func GetPostDetail(p *models.PostWithTag, id uint64, isAdmin bool) error {
 }
 
 func GetPostList(ps *[]models.PostWithTag, page, len int, onlyPublic bool) error {
-	sqlStr := " SELECT `id`, `title`, LEFT(`content`, 150) `content`, `createTime`, `public`, `top` " +
+	sqlStr := " SELECT `id`, `title`, LEFT(`content`, 150) `content`, `createtime`, `public`, `top` " +
 		" FROM `posts` " +
 		" %s " +
 		" ORDER BY `top` DESC, `id` DESC " +
@@ -128,7 +128,7 @@ func InsertPost(p *models.Post, tags *[]models.Tag) error {
 	}
 	p.ID = sf.GetVal()
 	rs, err := tx.Exec(
-		"INSERT INTO `posts` (`id`, `title`, `content`, `createTime`, `public`, `top`) "+
+		"INSERT INTO `posts` (`id`, `title`, `content`, `createtime`, `public`, `top`) "+
 			"VALUES (?, ?, ?, ?, ?, ?);",
 		p.ID, p.Title, p.Content, p.CreateTime, p.Public, p.Top,
 	)
@@ -168,7 +168,7 @@ func InsertPost(p *models.Post, tags *[]models.Tag) error {
 func GetPostSimpleyList(ps *[]models.PostSimplicity, start, len int) error {
 	return db.Select(
 		ps,
-		"SELECT `id`, `title`, `createTime`"+
+		"SELECT `id`, `title`, `createtime`"+
 			" FROM `posts` "+
 			" ORDER BY `id` DESC "+
 			" LIMIT ? "+

@@ -32,12 +32,12 @@ func GetComments(c *gin.Context) {
 
 func NewComments(c *gin.Context) {
 	data := struct {
-		PID     uint64 `json:"pid"`
-		FID     uint64 `json:"fid"`
+		PID     uint64 `json:"pid,string"`
+		FID     uint64 `json:"fid,string"`
 		Content string `json:"content"`
-		CName   string `json:"cname"`
-		CEMail  string `json:"cemail"`
-		CSite   string `json:"csite"`
+		Name    string `json:"name"`
+		EMail   string `json:"email"`
+		Site    string `json:"site"`
 	}{}
 
 	// 解析请求数据
@@ -47,24 +47,26 @@ func NewComments(c *gin.Context) {
 		responseError(c, codePayloadError)
 		return
 	}
-	if data.PID == 0 || data.Content == "" || data.CName == "" || data.CEMail == "" || data.CSite == "" {
+	if data.PID == 0 || data.Content == "" || data.Name == "" || data.EMail == "" || data.Site == "" {
 		logger.Error().Msgf("the false data of comment, data = %+v", data)
 		responseError(c, codeParamError)
 		return
 	}
+	id := idGen.GetVal()
 	err = db.InsertComment(&models.Comment{
+		ID:         id,
 		PID:        data.PID,
 		FID:        data.FID,
 		Content:    data.Content,
 		CreateTime: time.Now(),
-		CName:      data.CName,
-		CEMail:     data.CEMail,
-		CSite:      data.CSite,
+		Name:       data.Name,
+		EMail:      data.EMail,
+		Site:       data.Site,
 	})
 	if err != nil {
 		logger.Error().Msgf("Failed to create a comment, err = %v", err)
 		responseError(c, codeServiceBusy)
 		return
 	}
-	responseSuccess(c, nil)
+	responseSuccess(c, id)
 }

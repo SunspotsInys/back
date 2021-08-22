@@ -1,7 +1,7 @@
 name: "测试"
 mode: "debug"
 version: "v0.0.1"
-port: 9100
+port: 9101
 admin:
   name: "FFtp"
   passwd: "1234asdf"

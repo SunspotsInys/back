@@ -5,15 +5,15 @@ import "time"
 type Comment struct {
 	ID         uint64    `db:"id"         json:"id,string"`
 	PID        uint64    `db:"pid"        json:"pid,string,omitempty"`
-	FID        uint64    `db:"fid"        json:"fid,string"`
+	FID        uint64    `db:"fid"        json:"fid,string,omitempty"`
 	Content    string    `db:"content"    json:"content"`
-	CreateTime time.Time `db:"createtime" json:"createtime"`
-	CName      string    `db:"cname"      json:"cname"`
-	CEMail     string    `db:"cemail"     json:"cemail"`
-	CSite      string    `db:"csite"      json:"csite"`
+	CreateTime time.Time `db:"createtime" json:"createTime"`
+	Name       string    `db:"name"       json:"name"`
+	EMail      string    `db:"email"      json:"email"`
+	Site       string    `db:"site"       json:"site"`
 }
 
 type Comments struct {
 	Comment
-	ChildComment []Comment `json:"childComment"`
+	Children []Comment `json:"children"`
 }

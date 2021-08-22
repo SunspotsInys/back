@@ -4,29 +4,19 @@ import (
 	"errors"
 
 	"github.com/SunspotsInys/thedoor/models"
-	"github.com/SunspotsInys/thedoor/utils"
 )
 
 func InsertComment(c *models.Comment) error {
-	cid := utils.GetSnowflakeInstance()
-	c.ID = cid.GetVal()
 	rs, err := db.Exec(
 		"INSERT INTO `comments`"+
-			" (`id`, `pid`, `fid`, `content`, `createTime`, `cname`, `cemail`, `csite`) "+
+			" (`id`, `pid`, `fid`, `content`, `createtime`, `name`, `email`, `site`) "+
 			" VALUES(?, ?, ?, ?, ?, ?, ?, ?) ",
-		c.ID, c.PID, c.FID, c.Content, c.CreateTime, c.CName, c.CEMail, c.CSite,
+		c.ID, c.PID, c.FID, c.Content, c.CreateTime, c.Name, c.EMail, c.Site,
 	)
 	if err != nil {
 		return err
 	}
 	num, err := rs.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if num != 1 {
-		return errors.New("inserted wrongly")
-	}
-	num, err = rs.LastInsertId()
 	if err != nil {
 		return err
 	}
@@ -37,14 +27,20 @@ func InsertComment(c *models.Comment) error {
 }
 
 func GetCommentsList(cs *[]models.Comments, pid uint64) error {
-	err := db.Select(cs, "SELECT FROM `comments` WHERE `pid` = ? AND `fid` = \"\"", pid)
+	err := db.Select(cs, " SELECT "+
+		" `id`, `content`, `createtime`, `name`, `email`, `site` "+
+		" FROM `comments` WHERE `pid` = ? AND `fid` = 0 ",
+		pid,
+	)
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(*cs); i++ {
-		err = db.Select(
-			&((*cs)[i].ChildComment),
-			"SELECT FROM `comments` WHERE `pid` = ? AND `fid` = ?",
+		err = db.Select(&((*cs)[i].Children), " SELECT "+
+			" `id`, `fid`, `content`, `createtime`, `name`, `email`, `site` "+
+			" FROM `comments` "+
+			" WHERE `pid` = ? AND `fid` = ? "+
+			" ORDER BY `id` ",
 			pid, (*cs)[i].ID,
 		)
 		if err != nil {
