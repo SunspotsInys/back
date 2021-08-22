@@ -21,9 +21,10 @@ func GetPostDetail(p *models.PostWithTag, id uint64, isAdmin bool) error {
 	}
 	err := db.Get(p, sqlStr, id)
 	if err != nil {
+		logger.Error().Msgf("failed to get post info, sqlStr = %s, err = %v", sqlStr, err)
 		return err
 	}
-	return db.Select(
+	err = db.Select(
 		&(p.Tags),
 		"SELECT `tags`.`id`, `tags`.`name` "+
 			"FROM `tags` "+
@@ -32,6 +33,11 @@ func GetPostDetail(p *models.PostWithTag, id uint64, isAdmin bool) error {
 			"WHERE `taglists`.`pid` = ?",
 		p.ID,
 	)
+	if err != nil {
+		logger.Error().Msgf("failed to get post tag info, err = %v", err)
+		return err
+	}
+	return err
 }
 
 func GetPostList(ps *[]models.PostWithTag, page, len int, onlyPublic bool) error {
@@ -82,7 +88,7 @@ func GetPostTotal(onlyPublic bool) (int64, error) {
 	return tot, err
 }
 
-func InsertPost(p *models.Post, tags *[]uint64) error {
+func InsertPost(p *models.Post, tags *[]models.Tag) error {
 	if p == nil {
 		return errors.New("")
 	}
@@ -104,6 +110,22 @@ func InsertPost(p *models.Post, tags *[]uint64) error {
 	}()
 
 	sf := utils.GetSnowflakeInstance()
+	for i := range *tags {
+		if (*tags)[i].ID == 0 {
+			(*tags)[i].ID = sf.GetVal()
+			rs, err := tx.Exec("INSERT INTO `tags` (`id`, `name`) VALUES(?, ?)", (*tags)[i].ID, (*tags)[i].Name)
+			if err != nil {
+				return err
+			}
+			n, err := rs.RowsAffected()
+			if err != nil {
+				return err
+			}
+			if n != 1 {
+				return errors.New("exec insert error")
+			}
+		}
+	}
 	p.ID = sf.GetVal()
 	rs, err := tx.Exec(
 		"INSERT INTO `posts` (`id`, `title`, `content`, `createTime`, `public`, `top`) "+
@@ -127,7 +149,7 @@ func InsertPost(p *models.Post, tags *[]uint64) error {
 	}
 	defer stmt.Close()
 	for _, v := range *tags {
-		rs, err = stmt.Exec(sf.GetVal(), p.ID, v)
+		rs, err = stmt.Exec(sf.GetVal(), p.ID, v.ID)
 		if err != nil {
 			return err
 		}

@@ -14,7 +14,7 @@ func InitRoutes() *gin.Engine {
 		api.GET("/postTot", services.GetPostTotal)
 		api.GET("/posts", services.GetPostList)
 		api.GET("/post", services.GetPostDetail)
-		api.GET("/tags", services.GetTagList)
+		api.GET("/tags", services.GetTagInofList)
 		api.GET("/comments", services.GetComments)
 		api.POST("/comment", services.NewComments)
 
@@ -26,6 +26,7 @@ func InitRoutes() *gin.Engine {
 			admin.GET("/sysinfo", services.GetSysInfo)
 			admin.GET("/post", services.GetPostSimpleList)
 			admin.POST("/post", services.NewPost)
+			admin.GET("/tags", services.GetTagList)
 		}
 	}
 

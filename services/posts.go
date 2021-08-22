@@ -74,7 +74,7 @@ func GetPostDetail(c *gin.Context) {
 	}
 
 	// 判断是否是管理员
-	isAdmin := c.GetBool("admin")
+	isAdmin := c.GetBool("isAdmin")
 
 	var p models.PostWithTag
 	err = db.GetPostDetail(&p, data.ID, isAdmin)
@@ -91,15 +91,14 @@ func GetPostDetail(c *gin.Context) {
 
 func NewPost(c *gin.Context) {
 	data := struct {
-		Title   string   `json:"title"`
-		Content string   `json:"content"`
-		Public  bool     `json:"public"`
-		Top     bool     `json:"top"` // 是否置顶
-		Tags    []uint64 `json:"tags"`
+		Title   string       `json:"title"`
+		Content string       `json:"content"`
+		Public  bool         `json:"public"`
+		Top     bool         `json:"top"` // 是否置顶
+		Tags    []models.Tag `json:"tags"`
 	}{}
 
 	// 解析请求数据
-	c.Request.ParseForm()
 	err := c.Bind(&data)
 	if err != nil {
 		logger.Error().Msgf("Failed to parse data , uri = %s, err = %v", c.Request.RequestURI, err)

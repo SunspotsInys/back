@@ -41,7 +41,6 @@ func Signin(c *gin.Context) {
 
 func ParseJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Debug().Msgf("%+v", c.Request)
 		token := c.Request.Header.Get("X-Token")
 		if token == "" {
 			token = c.Query("token")

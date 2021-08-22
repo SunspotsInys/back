@@ -6,7 +6,7 @@ import (
 	"github.com/SunspotsInys/thedoor/models"
 )
 
-func GetTagList(tags *[]models.Tags) error {
+func GetTagInfoList(tags *[]models.Tags) error {
 	if tags == nil {
 		return errors.New("can not pass in a nil value")
 	}
@@ -18,6 +18,13 @@ func GetTagList(tags *[]models.Tags) error {
 		" ON `taglists`.`tid` = `tags`.`id` "+
 		" GROUP BY `taglists`.`tid` ",
 	)
+}
+
+func GetTagList(ts *[]models.Tag) error {
+	if ts == nil {
+		return errors.New("can not pass in a nil value")
+	}
+	return db.Select(ts, "SELECT * FROM `tags`")
 }
 
 func GetTagListByID(tags *[]models.Tag, id int64) error {

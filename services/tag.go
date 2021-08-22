@@ -6,8 +6,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetTagList(c *gin.Context) {
+func GetTagInofList(c *gin.Context) {
 	tags := new([]models.Tags)
+	err := db.GetTagInfoList(tags)
+	if err != nil {
+		logger.Error().Msgf("failed to get tag list, err = %s", err.Error())
+		responseError(c, codeServiceBusy)
+		return
+	}
+	responseSuccess(c, tags)
+}
+
+func GetTagList(c *gin.Context) {
+	tags := new([]models.Tag)
 	err := db.GetTagList(tags)
 	if err != nil {
 		logger.Error().Msgf("failed to get tag list, err = %s", err.Error())
