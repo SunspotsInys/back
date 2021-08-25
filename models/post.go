@@ -21,3 +21,10 @@ type PostSimplicity struct {
 	Title      string    `db:"title"      json:"title"`
 	CreateTime time.Time `db:"createtime" json:"createTime"`
 }
+
+type PostWithSameTID struct {
+	ID         uint64    `json:"id,string"`
+	Title      string    `json:"title"`
+	CreateTime time.Time `json:"createTime"`
+	Public     bool      `json:"public"`
+}

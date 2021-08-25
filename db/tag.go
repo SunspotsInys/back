@@ -27,9 +27,6 @@ func GetTagList(ts *[]models.Tag) error {
 	return db.Select(ts, "SELECT * FROM `tags`")
 }
 
-func GetTagListByID(tags *[]models.Tag, id int64) error {
-	if tags == nil {
-		return errors.New("can not pass in a nil value")
-	}
-	return db.Select(tags, "", id)
+func GetTagInfo(t *models.Tag, id uint64) error {
+	return db.Get(t, "SELECT `name` FROM `tags` WHERE `id` = ? LIMIT 1 ", id)
 }

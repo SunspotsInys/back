@@ -177,3 +177,33 @@ func GetPostSimpleyList(ps *[]models.PostSimplicity, start, len int) error {
 		start,
 	)
 }
+
+func GetPostListByTID(tags *[]models.PostWithSameTID, id uint64, admin bool) error {
+	if tags == nil {
+		return errors.New("can not pass in a nil value")
+	}
+	sqlStr := " SELECT `posts`.`id`, `posts`.`title`, `posts`.`createtime`, `posts`.`public` " +
+		" FROM `taglists` INNER JOIN `posts` ON `posts`.`id` = `taglists`.`pid` " +
+		" WHERE `taglists`.`tid` = ? %s" +
+		" ORDER BY `posts`.`createtime` DESC "
+	if admin {
+		sqlStr = fmt.Sprintf(sqlStr, "")
+	} else {
+		sqlStr = fmt.Sprintf(sqlStr, " AND `posts`.public = 1")
+	}
+	return db.Select(tags, sqlStr, id)
+}
+
+func GetAchieve(tags *[]models.PostWithSameTID, admin bool) error {
+	if tags == nil {
+		return errors.New("can not pass in a nil value")
+	}
+	sqlStr := " SELECT `posts`.`id`, `posts`.`title`, `posts`.`createtime`, `posts`.`public` " +
+		" FROM `posts` %s ORDER BY `posts`.`createtime` DESC  "
+	if admin {
+		sqlStr = fmt.Sprintf(sqlStr, "")
+	} else {
+		sqlStr = fmt.Sprintf(sqlStr, " WHERE `posts`.public = 1")
+	}
+	return db.Select(tags, sqlStr)
+}

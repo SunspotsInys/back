@@ -156,3 +156,15 @@ func GetPostSimpleList(c *gin.Context) {
 
 	responseSuccess(c, ps)
 }
+
+func GetAchieve(c *gin.Context) {
+	var err error
+	p := []models.PostWithSameTID{}
+	err = db.GetAchieve(&p, c.GetBool("isAdmin"))
+	if err != nil {
+		logger.Error().Msgf("failed to get post list by tag id , err = %s", err.Error())
+		responseError(c, codeServiceBusy)
+		return
+	}
+	responseSuccess(c, &p)
+}
