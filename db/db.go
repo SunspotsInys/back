@@ -4,14 +4,12 @@ import (
 	"fmt"
 
 	"github.com/SunspotsInys/thedoor/configs"
-	"github.com/SunspotsInys/thedoor/logs"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
 var (
-	db     *sqlx.DB
-	logger = logs.Logger
+	db *sqlx.DB
 )
 
 func init() {

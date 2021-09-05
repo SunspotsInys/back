@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/SunspotsInys/thedoor/db"
+	"github.com/SunspotsInys/thedoor/logs"
 	"github.com/SunspotsInys/thedoor/models"
 	"github.com/gin-gonic/gin"
 )
@@ -16,14 +17,14 @@ func GetComments(c *gin.Context) {
 	// 解析请求数据
 	err := c.BindQuery(&data)
 	if err != nil {
-		logger.Error().Msgf("Failed to parse data , uri = %s, err = %v", c.Request.RequestURI, err)
+		logs.Errorf("Failed to parse data , uri = %s, err = %v", c.Request.RequestURI, err)
 		responseError(c, codePayloadError)
 		return
 	}
 	var cs []models.Comments
 	err = db.GetCommentsList(&cs, data.ID)
 	if err != nil {
-		logger.Error().Msgf("获取评论失败, uri = %s, err = %v", c.Request.RequestURI, err)
+		logs.Errorf("获取评论失败, uri = %s, err = %v", c.Request.RequestURI, err)
 		responseError(c, codePayloadError)
 		return
 	}
@@ -43,12 +44,12 @@ func NewComments(c *gin.Context) {
 	// 解析请求数据
 	err := c.BindJSON(&data)
 	if err != nil {
-		logger.Error().Msgf("Failed to parse data , uri = %s, err = %v", c.Request.RequestURI, err)
+		logs.Errorf("Failed to parse data , uri = %s, err = %v", c.Request.RequestURI, err)
 		responseError(c, codePayloadError)
 		return
 	}
 	if data.PID == 0 || data.Content == "" || data.Name == "" || data.EMail == "" || data.Site == "" {
-		logger.Error().Msgf("the false data of comment, data = %+v", data)
+		logs.Errorf("the false data of comment, data = %+v", data)
 		responseError(c, codeParamError)
 		return
 	}
@@ -64,7 +65,7 @@ func NewComments(c *gin.Context) {
 		Site:       data.Site,
 	})
 	if err != nil {
-		logger.Error().Msgf("Failed to create a comment, err = %v", err)
+		logs.Errorf("Failed to create a comment, err = %v", err)
 		responseError(c, codeServiceBusy)
 		return
 	}

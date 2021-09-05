@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/SunspotsInys/thedoor/logs"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
 )
@@ -39,12 +40,12 @@ func (si *sysInfos) GetSysInfo() {
 	defer si.rw.Unlock()
 	cpus, err := cpu.Percent(time.Duration(time.Second), false)
 	if err != nil || len(cpus) == 0 {
-		logger.Error().Msgf("Failed to get CPU usage, err = %v", err)
+		logs.Errorf("Failed to get CPU usage, err = %v", err)
 		return
 	}
 	mem, err := mem.VirtualMemory()
 	if err != nil {
-		logger.Error().Msgf("Failed to get memory usage, err = %v", err)
+		logs.Errorf("Failed to get memory usage, err = %v", err)
 		return
 	}
 	si.SI = append(si.SI, sysInfo{

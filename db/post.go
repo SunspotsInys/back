@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/SunspotsInys/thedoor/logs"
 	"github.com/SunspotsInys/thedoor/models"
 	"github.com/SunspotsInys/thedoor/utils"
 )
@@ -21,7 +22,7 @@ func GetPostDetail(p *models.PostWithTag, id uint64, isAdmin bool) error {
 	}
 	err := db.Get(p, sqlStr, id)
 	if err != nil {
-		logger.Error().Msgf("failed to get post info, sqlStr = %s, err = %v", sqlStr, err)
+		logs.Errorf("failed to get post info, sqlStr = %s, err = %v", sqlStr, err)
 		return err
 	}
 	err = db.Select(
@@ -34,7 +35,7 @@ func GetPostDetail(p *models.PostWithTag, id uint64, isAdmin bool) error {
 		p.ID,
 	)
 	if err != nil {
-		logger.Error().Msgf("failed to get post tag info, err = %v", err)
+		logs.Errorf("failed to get post tag info, err = %v", err)
 		return err
 	}
 	return err
@@ -206,4 +207,83 @@ func GetAchieve(tags *[]models.PostWithSameTID, admin bool) error {
 		sqlStr = fmt.Sprintf(sqlStr, " WHERE `posts`.public = 1")
 	}
 	return db.Select(tags, sqlStr)
+}
+
+func UpdatePost(p *models.Post, tags *[]models.Tag) error {
+	if p == nil {
+		return errors.New("nil post")
+	}
+
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		if p != nil {
+			tx.Rollback()
+			err = errors.New("panic")
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			logs.Debug("OK")
+			err = tx.Commit()
+		}
+	}()
+
+	var ids = []uint64{}
+	mp := map[uint64]bool{}
+	err = tx.Select(&ids, "SELECT `tid` FROM `taglists` WHERE `pid` = ?", p.ID)
+	if err != nil {
+		return err
+	}
+	for _, v := range ids {
+		mp[v] = false
+	}
+
+	sf := utils.GetSnowflakeInstance()
+	for i := range *tags {
+		if (*tags)[i].ID == 0 {
+			(*tags)[i].ID = sf.GetVal()
+			rs, err := tx.Exec("INSERT INTO `tags` (`id`, `name`) VALUES(?, ?)", (*tags)[i].ID, (*tags)[i].Name)
+			if err != nil {
+				return err
+			}
+			n, err := rs.RowsAffected()
+			if err != nil {
+				return err
+			}
+			if n != 1 {
+				return errors.New("exec insert error")
+			}
+		} else {
+			mp[(*tags)[i].ID] = true
+		}
+	}
+
+	for k, v := range mp {
+		if !v {
+			_, err = tx.Exec("DELETE FROM `tagslists` WHERE `pid` = ? AND `tid` = ?", p.ID, k)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	rs, err := tx.Exec(
+		"UPDATE `posts` SET `title` = ?, `content` = ?, `public` = ?, `top` = ? WHERE `id` = ?",
+		p.Title, p.Content, p.Public, p.Top, p.ID,
+	)
+	if err != nil {
+		return err
+	}
+	n, err := rs.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return errors.New("exec insert error")
+	}
+
+	return nil
 }

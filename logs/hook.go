@@ -12,7 +12,7 @@ type h1 struct {
 }
 
 func (h1) Run(e *zerolog.Event, _ zerolog.Level, _ string) {
-	pc, file, line, ok := runtime.Caller(3)
+	pc, file, line, ok := runtime.Caller(4)
 	if ok {
 		files := strings.Split(file, "/")
 		funcNames := strings.Split(runtime.FuncForPC(pc).Name(), ".")
