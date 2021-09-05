@@ -7,7 +7,7 @@ admin:
   passwd: "1234asdf"
   avatar: "https://gitee.com/SunspotsInys/demo/raw/master/imGo/1685B4D357ACCF94.jpg"
 log:
-  level: "debug"
+  level: "release"
   filename: "logs.log"
   max_size: 1
   max_age: 30

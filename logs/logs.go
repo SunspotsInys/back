@@ -30,8 +30,7 @@ func init() {
 	}
 
 	logger = zerolog.New(writer).With().
-		Timestamp().Logger().
-		Hook(new(h1))
+		Timestamp().Logger().Hook(new(h1))
 	switch configs.Conf.LogLevel {
 	case "debug":
 		SetLogLevel(zerolog.DebugLevel)

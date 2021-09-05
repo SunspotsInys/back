@@ -29,7 +29,8 @@ func InitRoutes() *gin.Engine {
 			admin.GET("/sysinfo", services.GetSysInfo)
 			admin.GET("/post", services.GetPostSimpleList)
 			admin.POST("/post", services.NewPost)
-			admin.PATCH("/post")
+			admin.PATCH("/post", services.UpdatePost)
+			admin.DELETE("/post/:pid", services.DeletePost)
 			admin.GET("/tags", services.GetTagList)
 		}
 	}

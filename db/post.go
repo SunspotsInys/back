@@ -226,7 +226,6 @@ func UpdatePost(p *models.Post, tags *[]models.Tag) error {
 		} else if err != nil {
 			tx.Rollback()
 		} else {
-			logs.Debug("OK")
 			err = tx.Commit()
 		}
 	}()
@@ -241,23 +240,34 @@ func UpdatePost(p *models.Post, tags *[]models.Tag) error {
 		mp[v] = false
 	}
 
+	log.Println(len(*tags))
 	sf := utils.GetSnowflakeInstance()
 	for i := range *tags {
 		if (*tags)[i].ID == 0 {
 			(*tags)[i].ID = sf.GetVal()
-			rs, err := tx.Exec("INSERT INTO `tags` (`id`, `name`) VALUES(?, ?)", (*tags)[i].ID, (*tags)[i].Name)
+			_, err = tx.Exec("INSERT INTO `tags` (`id`, `name`) VALUES(?, ?)",
+				(*tags)[i].ID, (*tags)[i].Name)
 			if err != nil {
 				return err
 			}
-			n, err := rs.RowsAffected()
+			taglistid := sf.GetVal()
+			_, err = tx.Exec("INSERT INTO `taglists` (`id`, `tid`, `pid`) VALUES(?, ?, ?)",
+				taglistid, (*tags)[i].ID, p.ID)
 			if err != nil {
 				return err
-			}
-			if n != 1 {
-				return errors.New("exec insert error")
 			}
 		} else {
-			mp[(*tags)[i].ID] = true
+			_, ok := mp[(*tags)[i].ID]
+			if !ok {
+				taglistid := sf.GetVal()
+				_, err = tx.Exec("INSERT INTO `taglists` (`id`, `tid`, `pid`) VALUES(?, ?, ?)",
+					taglistid, (*tags)[i].ID, p.ID)
+				if err != nil {
+					return err
+				}
+			} else {
+				mp[(*tags)[i].ID] = true
+			}
 		}
 	}
 
@@ -270,19 +280,43 @@ func UpdatePost(p *models.Post, tags *[]models.Tag) error {
 		}
 	}
 
-	rs, err := tx.Exec(
+	_, err = tx.Exec(
 		"UPDATE `posts` SET `title` = ?, `content` = ?, `public` = ?, `top` = ? WHERE `id` = ?",
 		p.Title, p.Content, p.Public, p.Top, p.ID,
 	)
 	if err != nil {
 		return err
 	}
-	n, err := rs.RowsAffected()
+	log.Println("no error")
+
+	return nil
+}
+
+func DeletePost(id uint64) error {
+
+	tx, err := db.Beginx()
 	if err != nil {
 		return err
 	}
-	if n != 1 {
-		return errors.New("exec insert error")
+	defer func() {
+		p := recover()
+		if p != nil {
+			tx.Rollback()
+			err = errors.New("panic")
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	_, err = tx.Exec("DELETE FROM `posts` WHERE `id` = ?", id)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec("DELETE FROM `taglists` WHERE `pid` = ?", id)
+	if err != nil {
+		return err
 	}
 
 	return nil

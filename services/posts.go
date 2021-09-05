@@ -2,6 +2,7 @@ package services
 
 import (
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/SunspotsInys/thedoor/db"
@@ -193,7 +194,6 @@ func UpdatePost(c *gin.Context) {
 		responseError(c, codeParamError)
 		return
 	}
-	logs.Debug("break")
 	var top int64 = 0
 	if data.Top {
 		top = time.Now().Unix()
@@ -209,6 +209,23 @@ func UpdatePost(c *gin.Context) {
 	logs.Infof("%+v", post)
 	logs.Infof("%+v", tags)
 	err = db.UpdatePost(&post, &tags)
+	if err != nil {
+		logs.Errorf("Faild to update post, err = %v", err)
+		responseError(c, codeServiceBusy)
+		return
+	}
+	responseSuccess(c, nil)
+}
+
+func DeletePost(c *gin.Context) {
+	pid := c.Param("pid")
+	id, err := strconv.ParseUint(pid, 10, 64)
+	if err != nil {
+		logs.Errorf("Failed to parse data , uri = %s, err = %v", c.Request.RequestURI, err)
+		responseError(c, codeParamError)
+		return
+	}
+	err = db.DeletePost(id)
 	if err != nil {
 		logs.Errorf("Faild to update post, err = %v", err)
 		responseError(c, codeServiceBusy)

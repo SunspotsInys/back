@@ -12,12 +12,13 @@ var Conf = new(AppConfig)
 
 func init() {
 	// 读取配置文件路径
-	configPath := flag.String("c", "config.yaml", "配置文件路径config path")
+	var configPath string = "../config.yaml"
+	flag.StringVar(&configPath, "c", "../config.yaml", "配置文件路径config path")
 	flag.Parse()
-	log.Println(*configPath)
+	log.Println(configPath)
 
 	// 读取配置文件内容
-	viper.SetConfigFile(*configPath)
+	viper.SetConfigFile(configPath)
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Printf("viper.ReadInConfig() failed, err:%v\n", err)
